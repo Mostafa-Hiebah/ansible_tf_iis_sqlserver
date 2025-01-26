@@ -15,7 +15,7 @@ resource "local_file" "tf_ansible_inventory" {
     become_ask_pass=False
 
   DOC
-  filename = "../inventory"
+  filename = "../ansible/inventory"
 }
 
 
