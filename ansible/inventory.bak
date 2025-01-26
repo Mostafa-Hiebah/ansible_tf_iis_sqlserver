@@ -1,0 +1,30 @@
+#node1   ansible_host=192.168.43.58
+
+[ubuntu]
+node1    ansible_host=192.168.1.142
+
+[ubuntu:vars]
+ansible_connect=ssh
+#ansible_user=mhiebah
+#ansible_private_key=~/.ssh/idrsa
+become=True
+become_method=sudo
+become_user=root
+become_ask_pass=False
+
+
+[windows]
+node2 ansible_host=98.84.175.33 ansible_user=Administrator ansible_password='sXbvthbYeHqOa437tuS7Slpi)3.gWvPs' 
+; node3 ansible_host=35.183.62.104 ansible_user=Administrator ansible_password='Wx9u%BAczYVPXAWK08eJ%hJiCt(By4xS' 
+
+[windows:vars]
+ansible_connection=winrm
+; ansible_user=mostafa
+; ansible_password=''
+ansible_winrm_transport=ntlm
+ansible_winrm_server_cert_validation=ignore
+become=False
+become_method=runas
+become_user=administrator
+become_ask_pass=False
+

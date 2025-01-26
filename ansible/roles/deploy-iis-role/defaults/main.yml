@@ -1,0 +1,13 @@
+---
+# defaults file for roles/deploy-nginx-role
+app_name: "myapp"
+subapp_name: "/api"
+app_path: "C:\\inetpub\\wwwroot\\{{ app_name }}\\ui"
+subapp_path: "C:\\inetpub\\wwwroot\\{{ app_name }}\\api"
+app_port: 80
+pool_name: "{{ app_name }}_pool"
+temp_directory: 'C:\iis_dependencies'
+download_urls:
+  - "https://download.microsoft.com/download/1/2/8/128E2E22-C1B9-44A4-BE2A-5859ED1D4592/rewrite_amd64_en-US.msi"
+  - "https://download.visualstudio.microsoft.com/download/pr/9b8253ef-554d-4636-b708-e154c0199ce5/f3673dd1f2dc80e5b0505cbd2d4bd5d2/dotnet-hosting-6.0.36-win.exe"
+  

@@ -1,0 +1,6 @@
+---
+# handlers file for roles/lammp_windows_setup
+- name: Restart IIS
+  ansible.windows.win_service:
+    name: "w3svc"
+    state: "restarted"

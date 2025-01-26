@@ -1,0 +1,9 @@
+---
+# ansible-playbook role-sql.yaml --extra-vars "rl_mssql_sapwd=P@ssw0rd"
+- name: sql playbook
+  hosts: windows
+  gather_facts: false
+  roles:
+    - deploy-sql-role
+
+
