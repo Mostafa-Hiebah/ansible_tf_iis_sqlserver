@@ -21,17 +21,6 @@
     application_pool: "{{ pool_name }}"
   notify: Restart IIS
 
-- name: Firewall rule to allow TCP port {{ app_port }}
-  community.windows.win_firewall_rule:
-    name: HTTP_{{ app_port }}
-    localport: "{{ app_port }}"
-    action: allow
-    direction: in
-    protocol: tcp
-    state: present
-    enabled: true
-
-
 #Sub APP
 - name: Copy sub application files
   win_copy:
@@ -45,3 +34,13 @@
     physical_path: "{{ subapp_path }}"
     state: present
   notify: Restart IIS    
+
+- name: Firewall rule to allow TCP port {{ app_port }}
+  community.windows.win_firewall_rule:
+    name: HTTP_{{ app_port }}
+    localport: "{{ app_port }}"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: true

@@ -54,17 +54,15 @@ jobs:
 
       - name: run ansible playbook
         run: |
-          ansible-playbook role-iis.yaml
           ansible-playbook role-sql.yaml
+          ansible-playbook role-iis.yaml
         working-directory: ./ansible     
           # path: |
           #   dist
           #   package.json
         
-      - name: Wait for manual approval
-        run: |
-          echo "Pausing here, next task will destroy terraform"
-          read -p "Press enter to destroy terraform"  
+      - name: Wait for 5 minutes
+        run: sleep 300  
 
       - name: destroy terraform
         if: always()
