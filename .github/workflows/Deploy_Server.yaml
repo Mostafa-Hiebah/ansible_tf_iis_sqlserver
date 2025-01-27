@@ -31,6 +31,7 @@ jobs:
         run: |
             python -m pip install --upgrade pip
             pip install ansible
+            pip install pywinrm
 
       - name: Verify Ansible installation
         run: ansible --version
@@ -45,7 +46,7 @@ jobs:
       - name: Upload tf_key_pair
         uses: actions/upload-artifact@v4
         with:
-          name: dist-files
+          name: tf_key_pair
           path: ./terraform/tf_key_pair2.pem
 
       - name: Wait for 2 minutes
@@ -66,6 +67,7 @@ jobs:
           read -p "Press enter to destroy terraform"  
 
       - name: destroy terraform
+        if: always()
         run: |
           terraform destroy -auto-approve 
         working-directory: ./terraform 
