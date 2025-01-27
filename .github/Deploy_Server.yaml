@@ -1,0 +1,70 @@
+name: Deploy Server
+on:
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: install terraform
+        uses: hashicorp/setup-terraform@v3 
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      - name: Install Ansible
+          run: |
+            python -m pip install --upgrade pip
+            pip install ansible
+
+      - name: Verify Ansible installation
+        run: ansible --version
+
+      - name: apply terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve 
+          cat ../ansible/inventory
+        working-directory: ./terraform    
+
+      - name: Upload tf_key_pair
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: ./terraform/tf_key_pair2.pem
+
+      - name: Wait for 2 minutes
+        run: sleep 120
+
+      - name: run ansible playbook
+        run: |
+          ansible-playbook role-iis.yaml
+          ansible-playbook role-sql.yaml
+        working-directory: ./ansible     
+          # path: |
+          #   dist
+          #   package.json
+        
+      - name: Wait for manual approval
+        run: |
+          echo "Pausing here, next task will destroy terraform"
+          read -p "Press enter to destroy terraform"  
+
+      - name: destroy terraform
+        run: |
+          terraform destroy -auto-approve 
+        working-directory: ./terraform 
