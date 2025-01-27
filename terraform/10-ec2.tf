@@ -64,7 +64,7 @@ Set-Content -Path $scriptPath -Value "$scriptContent"
 $scriptPath = "C:\script.ps1"
 
 # Create a scheduled task trigger to run the task 5 minutes from now
-$trigger = New-ScheduledTaskTrigger -At (Get-Date).AddMinutes(2) -Once
+$trigger = New-ScheduledTaskTrigger -At (Get-Date).AddMinutes(1) -Once
 
 # Define the action that will run the PowerShell script
 $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "$scriptPath *>> c:\error.txt"
@@ -73,7 +73,7 @@ $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "$scriptPa
 $settings = New-ScheduledTaskSettingsSet -DontStopIfGoingOnBatteries -StartWhenAvailable
 
 # Register the task to run with the given trigger, action, and settings
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "RunMyScriptAfter5Minutes" -Description "Runs a PowerShell script 2 minutes after task is created" -User "NT AUTHORITY\SYSTEM" -Settings $settings
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "RunMyScriptAfter5Minutes" -Description "Runs a PowerShell script 1 minutes after task is created" -User "NT AUTHORITY\SYSTEM" -Settings $settings
 
 Write-Host "Scheduled task has been created successfully."
 

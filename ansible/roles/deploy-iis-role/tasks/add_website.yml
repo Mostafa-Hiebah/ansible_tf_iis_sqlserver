@@ -1,0 +1,47 @@
+
+---
+- name: Copy website files
+  win_copy:
+    src: app/ui/
+    dest: "{{ app_path }}"
+    
+- name: Create a new IIS Application Pool
+  win_iis_webapppool:
+    name: "{{ pool_name }}"   # Name of the Application Pool
+    state: started      # Ensures the pool is started after creation
+    
+- name: deploy IIS web site
+  win_iis_website:
+    name: "{{ app_name }}"
+    ip: '*'
+    hostname: '*'
+    state: started
+    port: "{{ app_port }}"
+    physical_path: "{{ app_path }}"
+    application_pool: "{{ pool_name }}"
+  notify: Restart IIS
+
+- name: Firewall rule to allow TCP port {{ app_port }}
+  community.windows.win_firewall_rule:
+    name: HTTP_{{ app_port }}
+    localport: "{{ app_port }}"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: true
+
+
+#Sub APP
+- name: Copy sub application files
+  win_copy:
+    src: app/api/
+    dest: "{{ subapp_path }}"
+
+- name: Add application to Web Site
+  community.windows.win_iis_webapplication:
+    name: "{{ subapp_name }}"
+    site: "{{ app_name }}"
+    physical_path: "{{ subapp_path }}"
+    state: present
+  notify: Restart IIS    

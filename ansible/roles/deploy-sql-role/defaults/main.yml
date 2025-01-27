@@ -2,5 +2,6 @@
 temp_directory: 'C:\Users\Administrator\Desktop\temp'
 download_urls:
   - "https://download.microsoft.com/download/3/8/d/38de7036-2433-4207-8eae-06e247e17b25/SQLServer2022-x64-ENU.iso"
+  # - "https://download.microsoft.com/download/3/8/d/38de7036-2433-4207-8eae-06e247e17b25/SQLServer2022-x64-ENU-Dev.iso"
 
-rl_mssql_sapwd: 'P@ssw0rd'
+sa_mssql_sapwd: 'P@ssw0rd'

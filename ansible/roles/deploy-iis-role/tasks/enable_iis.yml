@@ -1,0 +1,71 @@
+---
+- name: Enable IIS Feature
+  win_feature:
+    name:
+      - Web-Server               # IIS Web Server
+      - Web-Mgmt-Tools           # Management Tools
+      - Web-Net-Ext              # .NET Framework Extensions
+      - Web-Asp-Net45            # ASP.NET 4.5 (optional for .NET Framework apps)
+      - Web-Net-Ext45            # .NET Framework 4.5 Extensions
+
+- name: Remove Default website
+  win_iis_website:
+    name: "Default Web Site"
+    ip: '*'
+    hostname: '*'
+    state: absent
+    port: "{{ app_port }}"
+
+
+- name: Ensure the physical path directory exists
+  win_file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ app_path }}"
+    - "{{ subapp_path }}"
+  
+- name: Ensure IIS has access to the physical path
+  win_acl:
+    path: "{{ app_path }}"
+    user: "IIS_IUSRS"
+    rights: "FullControl"
+    type: allow
+    state: present
+
+# install dependencies 
+- name: Create temp folder on target for dependencies
+  ansible.windows.win_file:
+    path: '{{ temp_directory }}'
+    state: directory
+
+- name: Download dependencies files
+  ansible.windows.win_get_url:
+    url: "{{ item }}"
+    dest: "{{ temp_directory }}\\{{ item | basename }}"
+    force: false 
+  loop: "{{ download_urls }}"
+
+- name: Find all files in the dependencies directory
+  ansible.windows.win_find:
+    paths: "{{ temp_directory }}"
+    recurse: no
+    file_type: file
+  register: found_files
+
+- name: Install exe dependencies packages
+  ansible.windows.win_package:
+    path: "{{ item.path }}"
+    state: present
+    arguments: '/S /quiet'
+  loop: "{{ found_files.files }}"
+  when: item.path | regex_search('.exe$')
+
+- name: Install msi dependencies packages
+  ansible.windows.win_package:
+    path: "{{ item.path }}"
+    state: present
+    # arguments: '/S /quiet'
+  loop: "{{ found_files.files }}"
+  when: item.path | regex_search('.msi$')
+
