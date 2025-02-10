@@ -1,0 +1,110 @@
+---
+
+- name: Create folder on target
+  ansible.windows.win_file:
+    path: '{{ temp_directory }}'
+    state: directory
+
+- name: Download dependencies files
+  ansible.windows.win_get_url:
+    url: "{{ item }}"
+    dest: "{{ temp_directory }}\\{{ item | basename }}"
+    force: false 
+  loop: "{{ download_urls }}"
+
+- name: Unzip Elasticsearch package
+  win_unzip:
+    src: "{{ temp_directory }}\\elasticsearch-8.17.1-windows-x86_64.zip"
+    dest: "{{ temp_directory }}\\{{ elastic_folder }}"
+    creates: "{{ temp_directory }}\\{{ elastic_folder }}"
+    
+
+- name: Determine if the service exists.
+  ansible.windows.win_service:
+    name: '{{ elastic_folder }}'
+  register: service_info
+
+
+- name: Install Elasticsearch as a service
+  win_command: "{{ temp_directory }}\\{{ elastic_folder }}\\elasticsearch-8.17.1\\bin\\elasticsearch-service.bat install {{ elastic_folder }}"
+  args:
+    # chdir: "{{ temp_directory }}\\{{ elastic_folder }}\\bin"
+  when:
+    - not service_info.exists
+
+- name: Create elasticsearch.yml
+  ansible.builtin.win_template:
+    src: elasticsearch.yml
+    dest: "{{ temp_directory }}\\{{ elastic_folder }}\\elasticsearch-8.17.1\\config\\elasticsearch.yml"
+    remote_src: false
+
+
+- name: start Elasticsearch service to apply changes
+  win_service:
+    name: "{{ elastic_folder }}"
+    start_mode: auto
+    # state: started
+    state: restarted
+
+- name: Check if Elasticsearch is reachable
+  win_shell: |
+        $maxRetries = 30
+        $retryInterval = 10
+        $retryCount = 0
+        $isReady = $false
+
+        while ($retryCount -lt $maxRetries -and -not $isReady) {
+                  try {
+            
+                    Invoke-WebRequest -Uri "http://localhost:9200" -UseBasicParsing -ErrorAction Stop
+                    Write-Output "running"
+                    $isReady = $true
+                  break
+                  } catch {
+                    $errorMessage = $_.Exception.Message
+                    if ($errorMessage -match "Unable to connect") {
+                      Write-Output "Error: $errorMessage. Retrying in $retryInterval seconds..."
+                
+
+                    } else {
+                      $isReady = $true
+                      Write-Output "Elasticsearch is ready!"
+                      break
+                      Write-Output "Unexpected error: $errorMessage"
+                      
+                    }
+                    
+                    $retryCount++
+                    Start-Sleep -Seconds $retryInterval
+                  }
+                }
+
+
+        if (-not $isReady) {
+          throw "Elasticsearch did not become ready after $maxRetries retries."
+        }
+  register: elasticsearch_check
+  ignore_errors: yes
+
+
+#****** elasticsearch.yml configured to run without authentication *****
+# - name: Reset password for the 'elastic' user
+#   win_command: "{{ temp_directory }}\\{{ elastic_folder }}\\elasticsearch-8.17.1\\bin\\elasticsearch-reset-password.bat -u elastic --batch"
+#   args:
+#     chdir: "{{ temp_directory }}\\{{ elastic_folder }}\\elasticsearch-8.17.1\\bin"
+#   register: reset_password_result
+
+# - name: Debug output of the reset password task
+#   debug:
+#     var: reset_password_result
+
+
+- name: Firewall rule to allow TCP port 9200
+  community.windows.win_firewall_rule:
+    name: '9200'
+    localport: '9200'
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: true

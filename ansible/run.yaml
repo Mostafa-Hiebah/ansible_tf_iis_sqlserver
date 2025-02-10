@@ -1,8 +1,16 @@
 ---
 - hosts: windows
+  gather_facts: false
   roles:
-    - deploy-sql-role
+    - deploy-elasticsearch-role
 
-- hosts: windows
-  roles:
-    - deploy-iis-role
+# - hosts: windows
+#   gather_facts: false
+#   roles:
+#     - deploy-sql-role
+
+# - hosts: windows
+#   gather_facts: false
+#   roles:
+#     - deploy-iis-role
+

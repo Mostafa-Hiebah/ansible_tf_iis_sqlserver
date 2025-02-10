@@ -1,0 +1,7 @@
+---
+temp_directory: 'C:\elastic'
+download_urls:
+  - "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.17.1-windows-x86_64.zip"
+
+
+elastic_folder: 'elasticsearch1'

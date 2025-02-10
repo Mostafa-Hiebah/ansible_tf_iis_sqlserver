@@ -1,0 +1,4 @@
+---
+- name: Install Elastic Search
+  import_tasks: install_elasticsearch.yml
+

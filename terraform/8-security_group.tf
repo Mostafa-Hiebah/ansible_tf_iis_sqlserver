@@ -44,6 +44,14 @@ resource "aws_security_group" "public_security_group" {
     cidr_blocks = ["0.0.0.0/0"]    # who will connect ... any one
   }
 
+  ingress {
+    description = "allow elasticsearch "
+    from_port   = 9200
+    to_port     = 9200
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]    # who will connect ... any one
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
